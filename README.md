@@ -1,10 +1,12 @@
-## 📌 GKE + Google Cloud Storage Integration Project Overview
+# GKE + Google Cloud Storage Integration 
+
+## Project Overview
 
 The application is deployed on a Kubernetes cluster and accesses a GCS bucket to upload a dummy file. Authentication is handled securely without service account keys using GKE Workload Identity.
 
 ---
 
-## 🧱 Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -26,7 +28,7 @@ flowchart TD
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 - Kubernetes (GKE)
 - Docker
@@ -39,17 +41,16 @@ flowchart TD
 
 ---
 
-## 🔐 Key Features
+## Key Features
 
 - Secure authentication using Workload Identity (no static credentials)
-- Kubernetes-native deployment
 - Integration with GCS 
 - Containerized Python application
 
 
 ---
 
-## 🚀 Setup & Deployment
+## Setup & Deployment
 
 ### 1. Prerequisites
 
@@ -104,9 +105,14 @@ gcloud container clusters get-credentials cluster-1 --zone asia-south1-a
 
 ### 5. Create namespace
 
-This is where the application and its relevant resources will be deployed, logically separated from other k8s resoures.   
+This is where the application and its relevant resources will be deployed, logically separated from other k8s resoures. 
 
 ```bash
+# Clone the git repo in cloud shell
+git clone https://github.com/SreyasiB/gke-gcs-integration.git
+
+# Create namespace
+cd k8s-manifests/
 kubectl apply -f namespace.yml
 ```
 
@@ -163,26 +169,27 @@ gcloud artifacts repositories create demo-repo \
     --location=asia-south1 
 ```
 
+#### Build the image locally in cloud shell
+
+```bash
+cd app/
+docker build -t gcs-uploader .
+```
+
 #### Configure Docker Authentication
 
 ```bash
 gcloud auth configure-docker asia-south1-docker.pkg.dev
 ```
 
-#### Create Docker image
-
-```bash
-docker build -t gcs-uploader .
-```
-
 #### Tag and Push the Image to the repo
 
 ```bash
 # Tag the image
-docker tag gcs-uploader us-central1-docker.pkg.dev/[PROJECT-ID]/demo-repo/gcs-uploader:v1
+docker tag gcs-uploader asia-south1-docker.pkg.dev/[PROJECT-ID]/demo-repo/gcs-uploader:v1
 
 # Push the image
-docker push us-central1-docker.pkg.dev/[PROJECT-ID]/demo-repo/gcs-uploader:v1
+docker push asia-south1-docker.pkg.dev/[PROJECT-ID]/demo-repo/gcs-uploader:v1
 
 ```
 
@@ -191,26 +198,27 @@ docker push us-central1-docker.pkg.dev/[PROJECT-ID]/demo-repo/gcs-uploader:v1
 ### 8. Deploy to Kubernetes
 
 ```bash
+cd k8s-manifests/
 kubectl apply -f deployment.yml
 ```
 
 ---
 
-## 🔍 Verification
+## Verification
 
-Check pod status:
-
-```bash
-kubectl get pods
-```
-
-View logs:
+#### Check pod status:
 
 ```bash
-kubectl logs <pod-name>
+kubectl get pods -n gcs-uploader
 ```
 
-Expected output:
+#### View logs:
+
+```bash
+kubectl logs <pod-name> -n gcs-uploader
+```
+
+#### Expected output:
 
 ```
 Uploading hello_gke.txt to bucket gcs-gke...
@@ -219,7 +227,7 @@ Upload successful!
 
 ---
 
-## 🧠 Learning Outcomes
+## Learning Outcomes
 
 - Deploy applications on Kubernetes (GKE)
 - Configure secure access to GCP services using IAM
